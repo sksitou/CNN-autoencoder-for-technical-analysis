@@ -1,17 +1,33 @@
 """Some useful utilities when dealing with neural nets w/ tensorflow.
-
 Parag K. Mital, Jan. 2016
 """
 import tensorflow as tf
+from pandas import *
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-def read_data(file_name, cols):
+import random
+#from libs.utils import load_data, plot_two_lines
+def load_data(file_name, cols):
     df = pd.read_csv(file_name, usecols=cols)
     col = []
     for header in cols:
-        col.append(df.loc[:,header])
+        col.append((df.loc[:,header]).tolist())
     return col
+    '''
+    >>>price = load_data('0002_out.csv',['Close','Volume'])
+    '''
+
+def plot_two_lines(line1,line2):
+    index = range(len(line1))
+    plt.plot(index,line1,'bs',index,line2,'r--')
+    plt.xlabel("Date")
+    plt.ylabel("Score")
+    plt.show()
+    '''
+    >>>price = load_data('0002_out.csv',['Close','Volume'])
+    >>>plot_two_lines(price[0],price[1])
+    '''
 
 def montage_batch(images):
     """Draws all filters (n_input * n_output filters) as a

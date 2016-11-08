@@ -1,7 +1,7 @@
 #import
 import csv
 import pandas as pd
-from libs.utils import read_data
+from libs.utils import load_data
 VOLUME_CONST = 10000000.0
 
 
@@ -62,9 +62,9 @@ print len(volume)
 print len(percent_close)
 print len(nor_volume)
 
-output = {'close': close,
-        'volume': volume,
-        'percentage_close': percent_close,
-        'normalized_volume': nor_volume}
-df = pd.DataFrame(output, columns=['close','volume','percentage_close','normalized_volume'])
+output = {'Close': close,
+        'Volume': volume,
+        'Percentage_close': percent_close,
+        'Normalized_volume': nor_volume}
+df = pd.DataFrame(output, columns=['Close','Volume','Percentage_close','Normalized_volume'])
 df.to_csv(FILE_NAME_OUT)
