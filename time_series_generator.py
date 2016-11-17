@@ -15,16 +15,19 @@ def create_list(n,length,term,randomize=False):
 n 	 -- number of elements in the list
 term -- a function that takes one argument
 '''
-sinx = lambda x: sin(x)
-cosx = lambda x: cos(x)
+sinx = lambda x: sin(x/2)
+cosx = lambda x: cos(x/2)
 
 randomx = lambda x: normalvariate(0,corruption)+x
 
 def uptrend(term):
-	return lambda k: term(k)+(0.01*k)
+	return lambda k: term(k)+(0.1*k)
 
 def downtrend(term):
 	pass
+
+def straight():
+	lambda x: 0.5
 '''
 list = create_list(1,100,uptrend(sinx),True)
 

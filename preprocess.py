@@ -9,7 +9,7 @@ VOLUME_CONST = 10000000.0
 FILE_NAME = '0002.csv'
 FILE_NAME_OUT = '0002_out.csv'
 
-print (read_data(FILE_NAME,['Close','Volume']))
+load_data(FILE_NAME,['Close','Volume'])
 '''
 with open(FILE_NAME, 'rt') as file:
 	reader = csv.reader(file)
@@ -39,7 +39,8 @@ def detecter(e):
 #print "Contain missing data in volume : {0}".format(detecter(volume))
 #take average function
 
-#normalize funtion
+'''normalize by percentage return'''
+#normalize funtion, percentage
 #%return: ((t)-(t-1))/(t-1)
 end = len(close)
 percent_close = [(close[i]-close[i-1])/close[i-1] for i in range(1,end)]
@@ -48,6 +49,13 @@ end = len(volume)
 nor_volume = [e/VOLUME_CONST if e != 0 else 0 for e in volume]
 #print nor_volume
 #print percent_close
+
+'''normalize by scaling'''
+#normalize function, [-1,1]
+#%return: 2*(x-m)/(M-m)+1
+max, min = max(close), min(close)
+norm = lambda x: (2*(x-min)/(max-min))+1
+nor_close = map(norm,close)
 
 #write in new csv
 '''
@@ -60,11 +68,13 @@ output = np.dstack((close_np,volume_np,percent_close_np,nor_volume_np))
 print len(close)
 print len(volume)
 print len(percent_close)
+print len(nor_close)
 print len(nor_volume)
 
 output = {'Close': close,
         'Volume': volume,
         'Percentage_close': percent_close,
+        'Normalized_close': nor_close,
         'Normalized_volume': nor_volume}
-df = pd.DataFrame(output, columns=['Close','Volume','Percentage_close','Normalized_volume'])
+df = pd.DataFrame(output, columns=['Close','Volume','Percentage_close','Normalized_close','Normalized_volume'])
 df.to_csv(FILE_NAME_OUT)
