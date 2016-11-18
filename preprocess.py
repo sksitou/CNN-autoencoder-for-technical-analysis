@@ -1,13 +1,14 @@
 #import
 import csv
+import numpy as np
 import pandas as pd
 from libs.utils import load_data
 VOLUME_CONST = 10000000.0
 
 
 #read csv
-FILE_NAME = '0002.csv'
-FILE_NAME_OUT = '0002_out.csv'
+FILE_NAME = '2833.csv'
+FILE_NAME_OUT = '2833_out.csv'
 
 load_data(FILE_NAME,['Close','Volume'])
 '''
@@ -54,8 +55,14 @@ nor_volume = [e/VOLUME_CONST if e != 0 else 0 for e in volume]
 #normalize function, [-1,1]
 #%return: 2*(x-m)/(M-m)+1
 max, min = max(close), min(close)
-norm = lambda x: (2*(x-min)/(max-min))+1
+norm = lambda x: (2*(x-min)/(max-min))-1
 nor_close = map(norm,close)
+def normal(a):
+	max, min = np.amax(a), np.amin(a)
+	norm = lambda x: (2*(x-min)/(max-min))-1
+	nor_a = map(norm,a)
+	print np.amin(nor_a), np.amax(nor_a)
+	print nor_a
 
 #write in new csv
 '''

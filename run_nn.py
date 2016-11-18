@@ -7,7 +7,7 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 
 from libs.activations import lrelu
-from libs.utils import corrupt
+from libs.utils import corrupt,load_data,slice_data
 import time_series_generator as ts
 from conv_autoencoder import build_ae
 '''
@@ -15,11 +15,13 @@ feed stocks with batch
 '''
 
 logs_path = '/tmp/run/1'
-save_path = '/tmp/model.ckpt'
+save_path = '/tmp/model_stock.ckpt'
+file_name = '2833_out.csv'
 learning_rate = 0.001
 batch_size = 2
-n_epochs = 500
+n_epochs = 600
 input_size = 512
+n_input = 30
 n_pooling = 1
 corruption = ts.corruption
 term = ts.uptrend(ts.sinx)
@@ -31,24 +33,30 @@ def run_nn():
     n_filters=int(sys.argv[3])
     #train_np_image = [map(float,range(784)),map(float,range(784))]
 
+    
+    #a = [float(i) for i in range(input_size)]
     '''
-    a = [float(i) for i in range(784)]
-    a = [1]*784
-    train_np_image = [a,a,a,a,a,a,a,a,a,a,a]
-    '''
+    a = [1]*input_size
+    feature1 = [a,a,a,a,a,a,a,a,a,a,a]
+    
 
     #train_np_image = [[i*1.0 for i in range(784)],[i*1.0 for i in range(784)]*2]
     
     train_np_label = [range(10),range(10)]
-    train_np_image = ts.create_list(10,input_size,term,randomize=True)
+    feature2 = ts.create_list(10,input_size,term,randomize=True)
+    '''
+    data = load_data(file_name,['Normalized_close'])[0]
+    train_np_image = slice_data(data,input_size,n_input)
+
+    #train_np_image = feature1 + feature2
     
     sample_size = len(train_np_image)
 
     #print sample_size
     ae = build_ae(input_size=input_size,
                 input_shape=[None,input_size],
-                n_pooling = n_pooling,
-                n_filters = n_filters)
+                n_pooling = n_pooling)
+                #n_filters = n_filters)
 
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(ae['cost'])
 
@@ -107,44 +115,78 @@ def run_nn():
     
     scanner = range(len(layer1))
 
+    
     #trace1 = go.Scatter(x = x, y = output[0])
-    trace00 = go.Scatter(x = x, y = train_np_image[0])
-    trace0 = go.Scatter(x = x, y = output1)
+    #trace00 = go.Scatter(x = x, y = train_np_image[0])
+    '''
+    size = len(data)/input_size
+    length = size*input_size
+    data_plot = data[:length]
+    trace00 = go.Scatter(x = range(len(data)), y = data_plot)
+    data_output = slice_data(data_plot,512,size)
+    output_stock = []
+    for i in data_output:        
+        out = sess.run(ae['y'], feed_dict={ae['x']: data})
+        output_stock.append(out)
+    '''
+    trace00 = go.Scatter(x = range(len(data)), y = train_np_image[0])
+    trace0 = go.Scatter(x = range(len(output1)), y = output1)
     trace1 = go.Scatter(x = scanner, y = layer1)
     trace2 = go.Scatter(x = scanner, y = layer2)
     if n_filters == 3:
         trace3 = go.Scatter(x = scanner, y = layer3)
     else:
         trace3 = go.Scatter(x = scanner, y = layer2)
-
+    '''
     fig = tools.make_subplots(rows=5, cols=1, 
                             subplot_titles=('Input','Output','Hidden Layer1',
                                             'Hidden Layer2', 'Hidden Layer3'))
+    '''
+
+    fig = tools.make_subplots(rows=4, cols=1, 
+                            subplot_titles=('Input','Output','Hidden Layer1',
+                                            'Hidden Layer2'))
     fig.append_trace(trace00, 1, 1)
     fig.append_trace(trace0, 2, 1)
     fig.append_trace(trace1, 3, 1)
     fig.append_trace(trace2, 4, 1)
-    fig.append_trace(trace3, 5, 1)
+    #fig.append_trace(trace3, 5, 1)
     #print n_filters
     title = 'filters: {n_filters}, c:{corruption}'.format(n_filters=n_filters,corruption=ts.corruption)
     fig['layout'].update(height=600, width=600, title=title)
-    plot_url = py.plot(fig, filename='1')
+    plot_url = py.plot(fig, filename='stock')
     
-
+    '''
     #W1
-    '''
-    for filter_i in W1[:]:
-        filter_i = filter_i.T
-        print len(filter_i)
-        index = len(filter_i)
-        plt.plot(range(index),filter_i)
-        plt.draw()
-    plt.show()
-    '''
+    output0 = output[0].T.tolist()[0][0]
+    #output0 = output[2].T.tolist()[0][0]
 
+    
+    plt.figure(100)
+    plt.plot(range(len(output0)),output0)
+    plt.savefig('output.png')
+    plt.figure(200)
+    plt.plot(range(len(train_np_image[20])),train_np_image[20])
+    plt.savefig('input.png')
+    
+    layer1 = W1.T.tolist()[0]
+    index = len(layer1[0])
+    for i, filters in enumerate(layer1):
+        plt.figure(i)
+        plt.plot(range(index),filters)
+        plt.savefig('layer1,filter{i}.png'.format(i=i))
+    layer2 = W2.T.tolist()[0]
+    index = len(layer2[0])
+    for i, filters in enumerate(layer1):
+        plt.figure(i)
+        plt.plot(range(index),filters)
+        plt.savefig('layer2,filter{i}.png'.format(i=i))
+    #plt.show()
+    '''
     #plt.waitforbuttonpress()
+    
     sess.close()
-    return W
+    return W,output[0], train_np_image[0]
 
 if __name__ == '__main__':
-    W = run_nn()
+    W,output,train = run_nn()

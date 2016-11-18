@@ -18,6 +18,27 @@ def load_data(file_name, cols):
     >>>price = load_data('0002_out.csv',['Close','Volume'])
     '''
 
+def slice_data(a,size_input,n_input,constant=False):
+    '''
+    return random sliced time series
+    size_input: length of samples
+    n_input: number of samples
+
+    >>>sample = slice_data(data,512,100)
+    '''
+    output = []
+    if constant == False:
+        for _ in range(n_input):
+            #print len(a)
+            #print len(a)-size_input
+            idx = random.randint(0, len(a)-size_input)
+            output.append(a[idx:idx+size_input])
+    else:
+        for i in range(n_input):
+            idx = size_input*1
+            output.append(a[n_input-idx:idx])
+    return output
+
 def plot_two_lines(line1,line2):
     index = range(len(line1))
     plt.plot(index,line1,'bs',index,line2,'r--')

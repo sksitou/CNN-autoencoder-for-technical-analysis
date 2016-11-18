@@ -13,10 +13,10 @@ feed stocks with batch
 def build_ae(input_size,
                 input_shape,
                 n_pooling,
-                n_filters,
+                n_filters=[1,5,5],
                 filter_sizes=[4, 4, 4, 4],
                 corruption=False):
-    n_filters = [1]*(n_filters+1)
+    #n_filters = [1]*(n_filters+1)
 
     x = tf.placeholder(
         tf.float32, input_shape, name='x')
