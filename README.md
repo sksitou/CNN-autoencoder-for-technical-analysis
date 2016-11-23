@@ -1,1 +1,0 @@
-# Convolutional-autoencoder-for-technical-analysis
