@@ -1,1 +1,1 @@
-# CNN-autoencoder-for-technical-analysis
+# Convolutional-autoencoder-for-technical-analysis
