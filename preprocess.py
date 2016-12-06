@@ -3,12 +3,12 @@ import csv
 import numpy as np
 import pandas as pd
 from libs.utils import load_data
-VOLUME_CONST = 10000000.0
+VOLUME_CONST = 100000.0
 
 
 #read csv
-FILE_NAME = '2833.csv'
-FILE_NAME_OUT = '2833_out.csv'
+FILE_NAME = '8171.csv'
+FILE_NAME_OUT = '8171_out.csv'
 
 load_data(FILE_NAME,['Close','Volume'])
 '''
@@ -36,6 +36,19 @@ def detecter(e):
 	if str(e) == '?':
 		return True
 	return False
+def normal(a):
+	max, min = np.amax(a), np.amin(a)
+	norm = lambda x: (2*(x-min)/(max-min))-1
+	nor_a = map(norm,a)
+	return nor_a
+	print np.amin(nor_a), np.amax(nor_a)
+def normal(a):
+	max, min = np.amax(a), np.amin(a)
+	norm = lambda x: (x-min)/(max-min)
+	nor_a = map(norm,a)
+	return nor_a
+	#print np.amin(nor_a), np.amax(nor_a)
+	#print nor_a
 #print "Contain missing data in close : {0}".format(detecter(close))
 #print "Contain missing data in volume : {0}".format(detecter(volume))
 #take average function
@@ -48,6 +61,7 @@ percent_close = [(close[i]-close[i-1])/close[i-1] for i in range(1,end)]
 percent_close.insert(0,0)
 end = len(volume)
 nor_volume = [e/VOLUME_CONST if e != 0 else 0 for e in volume]
+lin_nor_volume = normal(nor_volume)
 #print nor_volume
 #print percent_close
 
@@ -57,12 +71,6 @@ nor_volume = [e/VOLUME_CONST if e != 0 else 0 for e in volume]
 max, min = max(close), min(close)
 norm = lambda x: (2*(x-min)/(max-min))-1
 nor_close = map(norm,close)
-def normal(a):
-	max, min = np.amax(a), np.amin(a)
-	norm = lambda x: (2*(x-min)/(max-min))-1
-	nor_a = map(norm,a)
-	print np.amin(nor_a), np.amax(nor_a)
-	print nor_a
 
 #write in new csv
 '''
@@ -82,6 +90,7 @@ output = {'Close': close,
         'Volume': volume,
         'Percentage_close': percent_close,
         'Normalized_close': nor_close,
-        'Normalized_volume': nor_volume}
-df = pd.DataFrame(output, columns=['Close','Volume','Percentage_close','Normalized_close','Normalized_volume'])
+        'Normalized_volume': nor_volume,
+        'Lin_nor_volume': lin_nor_volume}
+df = pd.DataFrame(output, columns=['Close','Volume','Percentage_close','Normalized_close','Normalized_volume','Lin_nor_volume'])
 df.to_csv(FILE_NAME_OUT)

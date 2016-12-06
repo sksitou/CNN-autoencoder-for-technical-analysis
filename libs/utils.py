@@ -18,7 +18,7 @@ def load_data(file_name, cols):
     >>>price = load_data('0002_out.csv',['Close','Volume'])
     '''
 
-def slice_data(a,size_input,n_input,constant=False):
+def slice_data(a,size_input,n_sample,constant=False):
     '''
     return random sliced time series
     size_input: length of samples
@@ -28,15 +28,19 @@ def slice_data(a,size_input,n_input,constant=False):
     '''
     output = []
     if constant == False:
-        for _ in range(n_input):
+        for _ in range(n_sample):
             #print len(a)
             #print len(a)-size_input
             idx = random.randint(0, len(a)-size_input)
             output.append(a[idx:idx+size_input])
     else:
-        for i in range(n_input):
-            idx = size_input*1
-            output.append(a[n_input-idx:idx])
+        a = a
+        n_sample = len(a)/size_input
+        for i in range(n_sample):
+            idx = size_input*(i+1)
+            #print idx
+            #print size_input
+            output.append(a[idx-size_input:idx])
     return output
 
 def plot_two_lines(line1,line2):
@@ -114,7 +118,7 @@ def montage(W):
 
 
 # %%
-def corrupt(x):
+def corrupt(x,shape,stddev):
     """Take an input tensor and add uniform masking.
 
     Parameters
@@ -127,10 +131,10 @@ def corrupt(x):
     x_corrupted : Tensor
         50 pct of values corrupted.
     """
-    return tf.mul(x, tf.cast(tf.random_uniform(shape=tf.shape(x),
-                                               minval=0,
-                                               maxval=2,
-                                               dtype=tf.int32), tf.float32))
+    return tf.add(x, tf.random_normal(shape=shape,
+                                               mean=0.0,
+                                               stddev=stddev,
+                                               dtype=tf.float32))
 
 
 # %%

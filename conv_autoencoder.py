@@ -13,9 +13,11 @@ feed stocks with batch
 def build_ae(input_size,
                 input_shape,
                 n_pooling,
-                n_filters=[1,5,5],
-                filter_sizes=[4, 4, 4, 4],
-                corruption=False):
+                corruption_level,
+                corruption,
+                n_filters=[6,6,6],
+                filter_sizes=[4, 7, 10, 4]):
+    beta = 0.001
     #n_filters = [1]*(n_filters+1)
 
     x = tf.placeholder(
@@ -24,7 +26,7 @@ def build_ae(input_size,
     if len(x.get_shape()) == 2:
         x_tensor = tf.reshape(
             #x, [-1, x_dim, x_dim, n_filters[0]])
-            x, [-1, input_size, 1, n_filters[0]])
+            x, [-1, input_size, 1, 1])
     elif len(x.get_shape()) == 5:
         x_tensor = x
     else:
@@ -32,7 +34,8 @@ def build_ae(input_size,
     current_input = x_tensor
 
     if corruption:
-        current_input = corrupt(current_input)
+        shape = current_input.get_shape().as_list()[1:]
+        current_input = corrupt(current_input,shape,corruption_level)
 
     # %%
     # Build the encoder
@@ -47,9 +50,10 @@ def build_ae(input_size,
 
     encoder = []
     shapes = []
-    for layer_i, n_output in enumerate(n_filters[1:]):
+    for layer_i, n_output in enumerate(n_filters):
         #n_input = current_input.get_shape().as_list()[3]
         n_input = current_input.get_shape().as_list()[3]
+        #print current_input
         
         #print str(layer_i) + '---'
         #print n_input
@@ -113,9 +117,10 @@ def build_ae(input_size,
     # now have the reconstruction through the network
     y = current_input
     # cost function measures pixel-wise difference
-    cost = tf.reduce_sum(tf.square(y - x_tensor))
+    cost = tf.reduce_mean(tf.square(y - x_tensor)) + beta*tf.nn.l2_loss(encoder[0]) + beta*tf.nn.l2_loss(encoder[1]) + beta*tf.nn.l2_loss(encoder[2])
+
     #print cost
-    encoder.reverse
+    encoder.reverse()
 
     # %%
     return {'x': x, 'z': z, 'y': y, 'cost': cost, 'encoder': encoder}
